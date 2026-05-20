@@ -11,14 +11,8 @@
     "withGlobalTauri": true,
     "windows": [],
     "security": {
-      "csp": null
-    },
-    "trayIcon": {
-      "id": "main",
-      "iconPath": "icons/icon.png",
-      "iconAsTemplate": true,
-      "menuOnLeftClick": false,
-      "title": ""
+      "csp": null,
+      "dangerousDisableAssetCspModification": true
     }
   },
   "bundle": {
