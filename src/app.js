@@ -14,17 +14,15 @@ let tauriOpen    = null   // @tauri-apps/plugin-shell openUrl
 let tauriNotify  = null   // @tauri-apps/plugin-notification
 
 async function initTauri() {
-  const { Store } = await import('https://unpkg.com/@tauri-apps/plugin-store@2/dist/index.js').catch(() => ({}))
+  // localStorage directo — sem imports externos que bloqueiam o arranque
   tauriInvoke = window.__TAURI__?.core?.invoke
   tauriOpen   = window.__TAURI__?.shell?.open
-
-  // Store simples via localStorage como fallback robusto
-  // (Tauri store persiste entre sessões mas localStorage funciona dentro da WebView)
   tauriStore = {
     async get(key) { try { return JSON.parse(localStorage.getItem(key)) } catch { return null } },
-    async set(key, val) { localStorage.setItem(key, JSON.stringify(val)) },
-    async delete(key) { localStorage.removeItem(key) },
+    async set(key, val) { try { localStorage.setItem(key, JSON.stringify(val)) } catch {} },
+    async delete(key) { try { localStorage.removeItem(key) } catch {} },
   }
+}
 }
 
 // ─── Persistência de tokens e timers ─────────────────────────────────────────
