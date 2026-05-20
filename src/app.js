@@ -138,19 +138,28 @@ let state = {
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', async () => {
-  await initTauri()
+document.addEventListener(DOMContentLoaded, async () => {
+  try { await Promise.race([initTauri(), new Promise(r => setTimeout(r, 2000))]) }
+  catch(e) {}
 
-  const token  = await storeGet('auth_token')
-  const timers = await storeGet('timers') || []
+  let token = null
+  let timers = []
+  try { token = await storeGet(auth_token) } catch(e) {}
+  try { timers = await storeGet(timers) || [] } catch(e) {}
+
   state.authenticated = !!token
-  state.timers = timers
+  state.timers = Array.isArray(timers) ? timers : []
 
-  if (!state.authenticated) showLogin()
-  else showTimers()
+  try { bindEvents() } catch(e) { console.error(bindEvents:, e) }
+  try { startTick() } catch(e) {}
 
-  bindEvents()
-  startTick()
+  try {
+    if (!state.authenticated) showLogin()
+    else showTimers()
+  } catch(e) {
+    console.error(show falhou:, e)
+    try { showLogin() } catch(e2) {}
+  }
 })
 
 // ─── Views ────────────────────────────────────────────────────────────────────
