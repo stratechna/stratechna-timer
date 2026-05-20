@@ -1,3 +1,4 @@
+use tauri_plugin_shell::ShellExt;
 use tauri::{
     image::Image,
     menu::{MenuBuilder, MenuItemBuilder},
