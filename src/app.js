@@ -23,7 +23,6 @@ async function initTauri() {
     async delete(key) { try { localStorage.removeItem(key) } catch {} },
   }
 }
-}
 
 // ─── Persistência de tokens e timers ─────────────────────────────────────────
 async function storeGet(key) { return tauriStore ? tauriStore.get(key) : null }
