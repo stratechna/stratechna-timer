@@ -5,7 +5,7 @@
   "version": "1.0.0",
   "build": {
     "frontendDist": "../src",
-    "devUrl": "../src/index.html"
+    "devUrl": "http://localhost:1420"
   },
   "app": {
     "withGlobalTauri": true,
