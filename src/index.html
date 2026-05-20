@@ -560,14 +560,14 @@
       </div>
 
       <!-- Formulario -->
-      <div id="ticket-form" style="padding:14px;display:flex;flex-direction:column;gap:12px">
+      <div id="ticket-form" style="padding:14px;display:flex;flex-direction:column;gap:12px;overflow:visible">
         <!-- Campo Cliente -->
         <div style="position:relative">
           <label class="ticket-label">Cliente *</label>
-          <div id="cliente-search-box">
+          <div id="cliente-search-box" style="position:relative">
             <input type="text" class="ticket-input" id="ticket-cliente-search"
               placeholder="Escreve o nome do cliente..." autocomplete="off" />
-            <div id="cliente-resultados" style="display:none;position:fixed;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;z-index:9999;max-height:200px;overflow-y:auto;width:360px;box-shadow:0 4px 16px rgba(0,0,0,0.4);"></div>
+            <div id="cliente-resultados" style="display:none;position:absolute;top:calc(100% + 2px);left:0;right:0;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;z-index:9999;max-height:200px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,0.4);"></div>
           </div>
           <div id="cliente-selected" style="display:none;align-items:center;gap:8px;background:rgba(136,0,0,0.08);border:1px solid rgba(136,0,0,0.25);border-radius:6px;padding:7px 10px;">
             <svg viewBox="0 0 24 24" fill="none" stroke="#880000" stroke-width="2.5" style="width:12px;height:12px;flex-shrink:0"><polyline points="20,6 9,17 4,12"/></svg>
