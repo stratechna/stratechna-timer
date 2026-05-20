@@ -139,16 +139,28 @@ let state = {
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener(DOMContentLoaded, async () => {
+  // Timeout de emergencia — se nao carrega em 3s, mostra login
+  const emergencyTimeout = setTimeout(() => {
+    console.warn(Timeout de emergencia — a mostrar login)
+    try { showLogin() } catch(e) {}
+    try { bindEvents() } catch(e) {}
+  }, 3000)
+
   try { await Promise.race([initTauri(), new Promise(r => setTimeout(r, 2000))]) }
   catch(e) {}
 
   let token = null
   let timers = []
   try { token = await storeGet(auth_token) } catch(e) {}
-  try { timers = await storeGet(timers) || [] } catch(e) {}
+  try {
+    const t = await storeGet(timers)
+    timers = Array.isArray(t) ? t : []
+  } catch(e) {}
 
   state.authenticated = !!token
-  state.timers = Array.isArray(timers) ? timers : []
+  state.timers = timers
+
+  clearTimeout(emergencyTimeout)
 
   try { bindEvents() } catch(e) { console.error(bindEvents:, e) }
   try { startTick() } catch(e) {}
