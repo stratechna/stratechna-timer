@@ -14,7 +14,6 @@
     "core:window:allow-show",
     "core:window:allow-hide",
     "core:window:allow-set-focus",
-    "core:window:allow-is-visible",
-    "positioner:default"
+    "core:window:allow-is-visible"
   ]
 }
