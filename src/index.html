@@ -561,21 +561,13 @@
 
       <!-- Formulario -->
       <div id="ticket-form" style="padding:14px;display:flex;flex-direction:column;gap:12px">
-        <div>
-          <label class="ticket-label">Departamento *</label>
-          <select class="ticket-select" id="ticket-dept">
-            <option value="">A carregar...</option>
-          </select>
-          <div class="field-error" id="err-dept">Selecciona um departamento.</div>
-        </div>
-
         <!-- Campo Cliente -->
-        <div>
+        <div style="position:relative">
           <label class="ticket-label">Cliente *</label>
-          <div id="cliente-search-box" style="position:relative">
+          <div id="cliente-search-box">
             <input type="text" class="ticket-input" id="ticket-cliente-search"
-              placeholder="Pesquisar cliente..." autocomplete="off" />
-            <div id="cliente-resultados" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;z-index:100;max-height:180px;overflow-y:auto;margin-top:2px;"></div>
+              placeholder="Escreve o nome do cliente..." autocomplete="off" />
+            <div id="cliente-resultados" style="display:none;position:fixed;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;z-index:9999;max-height:200px;overflow-y:auto;width:360px;box-shadow:0 4px 16px rgba(0,0,0,0.4);"></div>
           </div>
           <div id="cliente-selected" style="display:none;align-items:center;gap:8px;background:rgba(136,0,0,0.08);border:1px solid rgba(136,0,0,0.25);border-radius:6px;padding:7px 10px;">
             <svg viewBox="0 0 24 24" fill="none" stroke="#880000" stroke-width="2.5" style="width:12px;height:12px;flex-shrink:0"><polyline points="20,6 9,17 4,12"/></svg>
@@ -583,6 +575,14 @@
             <button id="btn-cliente-limpar" style="background:none;border:none;color:var(--muted);font-size:10px;cursor:pointer;text-decoration:underline;font-family:var(--sans)">alterar</button>
           </div>
           <div class="field-error" id="err-cliente" style="display:none;position:static">Selecciona um cliente.</div>
+        </div>
+
+        <div>
+          <label class="ticket-label">Departamento *</label>
+          <select class="ticket-select" id="ticket-dept">
+            <option value="">A carregar...</option>
+          </select>
+          <div class="field-error" id="err-dept">Selecciona um departamento.</div>
         </div>
 
         <!-- Campo Tarefa — só visível para MBontime -->
