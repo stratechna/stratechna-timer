@@ -28,11 +28,7 @@
     "macOS": {
       "minimumSystemVersion": "10.15",
       "entitlements": "entitlements.plist",
-      "infoPlist": {
-        "NSAppTransportSecurity": {
-          "NSAllowsArbitraryLoads": true
-        }
-      }
+      "infoPlist": "Info.plist"
     },
     "windows": {
       "webviewInstallMode": {
