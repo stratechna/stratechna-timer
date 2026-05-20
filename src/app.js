@@ -207,6 +207,38 @@ const MBONTIME_TAREFAS = [
 let ticketState = {
   prioridade: 'Low',
   departamentos: [],
+  clienteId: null,
+  clienteNome: '',
+  clienteResultados: [],
+  clienteSearchTimeout: null,
+}
+
+
+function renderClienteResultados(resultados) {
+  const list = document.getElementById('cliente-resultados')
+  if (!list) return
+  if (!resultados.length) { list.innerHTML = ''; list.style.display = 'none'; return }
+  list.style.display = 'block'
+  list.innerHTML = resultados.map(c => `
+    <div class="cliente-item" data-id="${esc(c.id)}" data-nome="${esc(c.nome)}"
+      style="padding:8px 10px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px;color:var(--text);">
+      <div style="font-weight:600">${esc(c.nome)}</div>
+      ${c.nif ? `<div style="font-size:10px;color:var(--muted)">NIF: ${esc(c.nif)}</div>` : ''}
+    </div>`).join('')
+  list.querySelectorAll('.cliente-item').forEach(el => {
+    el.addEventListener('mouseenter', () => el.style.background = 'var(--bg2)')
+    el.addEventListener('mouseleave', () => el.style.background = '')
+    el.addEventListener('click', () => {
+      ticketState.clienteId = el.dataset.id
+      ticketState.clienteNome = el.dataset.nome
+      document.getElementById('cliente-selected-nome').textContent = el.dataset.nome
+      document.getElementById('cliente-selected').style.display = 'flex'
+      document.getElementById('cliente-search-box').style.display = 'none'
+      list.style.display = 'none'
+      const errC = document.getElementById('err-cliente')
+      if (errC) errC.style.display = 'none'
+    })
+  })
 }
 
 async function showNovoTicket() {
@@ -227,6 +259,17 @@ async function showNovoTicket() {
   document.getElementById('err-assunto').style.display = 'none'
   document.getElementById('err-desc').style.display = 'none'
   document.getElementById('err-tarefa') && (document.getElementById('err-tarefa').style.display = 'none')
+  ticketState.clienteId = null
+  ticketState.clienteNome = ''
+  ticketState.clienteResultados = []
+  const errCliente = document.getElementById('err-cliente')
+  if (errCliente) errCliente.style.display = 'none'
+  const clienteInput = document.getElementById('ticket-cliente-search')
+  if (clienteInput) clienteInput.value = ''
+  const clienteSelected = document.getElementById('cliente-selected')
+  if (clienteSelected) clienteSelected.style.display = 'none'
+  const clienteSearchBox = document.getElementById('cliente-search-box')
+  if (clienteSearchBox) clienteSearchBox.style.display = 'block'
   ticketState.prioridade = 'Low'
   document.querySelectorAll('.prio-btn').forEach(b => {
     b.className = 'prio-btn' + (b.dataset.prio === 'Low' ? ' active-low' : '')
@@ -267,6 +310,38 @@ function renderDeptSelect(depts) {
 }
 
 function bindTicketEvents() {
+
+  // Pesquisa de cliente
+  document.getElementById('ticket-cliente-search')?.addEventListener('input', async e => {
+    const q = e.target.value.trim()
+    if (document.getElementById('err-cliente')) document.getElementById('err-cliente').style.display = 'none'
+    if (q.length < 2) { renderClienteResultados([]); return }
+    clearTimeout(ticketState.clienteSearchTimeout)
+    ticketState.clienteSearchTimeout = setTimeout(async () => {
+      try {
+        const token = await getValidToken()
+        const r = await fetch(`${API_BASE}/crm/search?q=${encodeURIComponent(q)}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        const data = await r.json()
+        ticketState.clienteResultados = data.accounts || []
+        renderClienteResultados(ticketState.clienteResultados)
+      } catch { renderClienteResultados([]) }
+    }, 300)
+  })
+
+  document.getElementById('btn-cliente-limpar')?.addEventListener('click', () => {
+    ticketState.clienteId = null
+    ticketState.clienteNome = ''
+    const cs = document.getElementById('cliente-selected')
+    const cb = document.getElementById('cliente-search-box')
+    const ci = document.getElementById('ticket-cliente-search')
+    if (cs) cs.style.display = 'none'
+    if (cb) cb.style.display = 'block'
+    if (ci) ci.value = ''
+    renderClienteResultados([])
+  })
+
   // Limpar erro tarefa ao seleccionar
   document.getElementById('ticket-tarefa')?.addEventListener('change', e => {
     if (e.target.value) document.getElementById('err-tarefa').style.display = 'none'
@@ -318,6 +393,7 @@ function bindTicketEvents() {
     const tarefa = dept === 'mbontime' ? (document.getElementById('ticket-tarefa')?.value || '') : null
     let hasErr = false
     if (!dept) { document.getElementById('err-dept').style.display = 'block'; hasErr = true }
+    if (!ticketState.clienteId) { document.getElementById('err-cliente').style.display = 'block'; hasErr = true }
     if (!assunto) { document.getElementById('err-assunto').style.display = 'block'; hasErr = true }
     if (!descricao) { document.getElementById('err-desc').style.display = 'block'; hasErr = true }
     if (dept === 'mbontime' && !tarefa) { document.getElementById('err-tarefa').style.display = 'block'; hasErr = true }
@@ -336,6 +412,7 @@ function bindTicketEvents() {
           descricao,
           departamento_slug: dept,
           prioridade: ticketState.prioridade,
+          crm_account_id: ticketState.clienteId,
           ...(tarefa ? { tarefa } : {}),
         })
       })

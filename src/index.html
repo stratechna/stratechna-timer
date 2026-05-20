@@ -569,6 +569,22 @@
           <div class="field-error" id="err-dept">Selecciona um departamento.</div>
         </div>
 
+        <!-- Campo Cliente -->
+        <div>
+          <label class="ticket-label">Cliente *</label>
+          <div id="cliente-search-box" style="position:relative">
+            <input type="text" class="ticket-input" id="ticket-cliente-search"
+              placeholder="Pesquisar cliente..." autocomplete="off" />
+            <div id="cliente-resultados" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;z-index:100;max-height:180px;overflow-y:auto;margin-top:2px;"></div>
+          </div>
+          <div id="cliente-selected" style="display:none;align-items:center;gap:8px;background:rgba(136,0,0,0.08);border:1px solid rgba(136,0,0,0.25);border-radius:6px;padding:7px 10px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#880000" stroke-width="2.5" style="width:12px;height:12px;flex-shrink:0"><polyline points="20,6 9,17 4,12"/></svg>
+            <span id="cliente-selected-nome" style="font-size:12px;font-weight:600;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+            <button id="btn-cliente-limpar" style="background:none;border:none;color:var(--muted);font-size:10px;cursor:pointer;text-decoration:underline;font-family:var(--sans)">alterar</button>
+          </div>
+          <div class="field-error" id="err-cliente" style="display:none;position:static">Selecciona um cliente.</div>
+        </div>
+
         <!-- Campo Tarefa — só visível para MBontime -->
         <div id="tarefa-section" style="display:none">
           <label class="ticket-label">Tarefa *</label>
