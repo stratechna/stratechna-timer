@@ -215,31 +215,57 @@ let ticketState = {
 
 
 function renderClienteResultados(resultados) {
-  const list = document.getElementById('cliente-resultados')
-  if (!list) return
-  if (!resultados.length) { list.innerHTML = ''; list.style.display = 'none'; return }
-  list.style.display = 'block'
-  list.innerHTML = resultados.map(c => `
-    <div class="cliente-item" data-id="${esc(c.id)}" data-nome="${esc(c.nome)}"
-      style="padding:8px 10px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px;color:var(--text);">
-      <div style="font-weight:600">${esc(c.nome)}</div>
-      ${c.nif ? `<div style="font-size:10px;color:var(--muted)">NIF: ${esc(c.nif)}</div>` : ''}
-    </div>`).join('')
-  list.querySelectorAll('.cliente-item').forEach(el => {
-    el.addEventListener('mouseenter', () => el.style.background = 'var(--bg2)')
-    el.addEventListener('mouseleave', () => el.style.background = '')
+  // Dropdown flutuante no body para evitar corte por overflow
+  let drop = document.getElementById('cliente-drop-float')
+  if (!drop) {
+    drop = document.createElement('div')
+    drop.id = 'cliente-drop-float'
+    drop.style.position = 'fixed'
+    drop.style.zIndex = '99999'
+    drop.style.background = '#1c2230'
+    drop.style.border = '1px solid #30363d'
+    drop.style.borderRadius = '6px'
+    drop.style.maxHeight = '220px'
+    drop.style.overflowY = 'auto'
+    drop.style.boxShadow = '0 8px 24px rgba(0,0,0,0.6)'
+    drop.style.display = 'none'
+    document.body.appendChild(drop)
+  }
+
+  if (!resultados.length) { drop.style.display = 'none'; return }
+
+  const inp = document.getElementById('ticket-cliente-search')
+  if (inp) {
+    const r = inp.getBoundingClientRect()
+    drop.style.left = r.left + 'px'
+    drop.style.top = (r.bottom + 2) + 'px'
+    drop.style.width = r.width + 'px'
+  }
+
+  drop.style.display = 'block'
+  drop.innerHTML = resultados.map(c =>
+    '<div class="cli-item" data-id="' + esc(c.id) + '" data-nome="' + esc(c.nome) + '" style="padding:10px 12px;cursor:pointer;border-bottom:1px solid #21262d;font-size:12px;color:#e6edf3;">' +
+    '<div style="font-weight:600">' + esc(c.nome) + '</div>' +
+    (c.nif ? '<div style="font-size:10px;color:#7d8590">NIF: ' + esc(c.nif) + '</div>' : '') +
+    '</div>'
+  ).join('')
+
+  drop.querySelectorAll('.cli-item').forEach(el => {
+    el.addEventListener('mouseenter', () => { el.style.background = '#161b22' })
+    el.addEventListener('mouseleave', () => { el.style.background = '' })
     el.addEventListener('click', () => {
       ticketState.clienteId = el.dataset.id
       ticketState.clienteNome = el.dataset.nome
       document.getElementById('cliente-selected-nome').textContent = el.dataset.nome
       document.getElementById('cliente-selected').style.display = 'flex'
       document.getElementById('cliente-search-box').style.display = 'none'
-      list.style.display = 'none'
+      drop.style.display = 'none'
       const errC = document.getElementById('err-cliente')
       if (errC) errC.style.display = 'none'
     })
   })
-}
+  return // funcao termina aqui - o codigo abaixo e a versao antiga que sera removida
+
 
 async function showNovoTicket() {
   setView('ticket')
