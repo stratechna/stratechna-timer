@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stratechna Cronómetros</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0d1117;
+      --bg2:      #161b22;
+      --bg3:      #1c2230;
+      --border:   #21262d;
+      --border2:  #30363d;
+      --text:     #e6edf3;
+      --muted:    #7d8590;
+      --red:      #880000;
+      --red-light:#cc3333;
+      --wg:       #7977BB;
+      --mb:       #2D5A4A;
+      --mb-light: #4CAF8A;
+      --proj:     #E8820C;
+      --success:  #3fb950;
+      --error:    #f85149;
+      --mono:     'JetBrains Mono', monospace;
+      --sans:     'Inter', sans-serif;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 13px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      -webkit-app-region: drag; /* Permite arrastar a janela pelo header */
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      -webkit-app-region: no-drag;
+    }
+    .logo {
+      width: 24px; height: 24px;
+      border-radius: 5px;
+      flex-shrink: 0;
+      overflow: hidden;
+      background: var(--red);
+    }
+    .logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .header-title { font-size: 13px; font-weight: 600; color: var(--text); }
+    .header-sub { font-size: 10px; color: var(--muted); margin-top: 1px; }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      -webkit-app-region: no-drag;
+    }
+    .btn-icon {
+      background: none;
+      border: 1px solid var(--border2);
+      color: var(--muted);
+      border-radius: 6px;
+      width: 28px; height: 28px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+    .btn-icon:hover { color: var(--text); border-color: var(--muted); }
+    .btn-icon svg { width: 14px; height: 14px; }
+
+    /* ── Conteúdo scrollável ── */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    .content::-webkit-scrollbar { width: 4px; }
+    .content::-webkit-scrollbar-track { background: transparent; }
+    .content::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+    /* ── Login ── */
+    #view-login { padding: 28px 20px; }
+    .login-logo { text-align: center; margin-bottom: 24px; }
+    .login-logo-box {
+      width: 48px; height: 48px;
+      background: var(--red);
+      border-radius: 12px;
+      margin: 0 auto 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px; font-weight: 800; color: #fff;
+    }
+    .login-logo p { font-size: 11px; color: var(--muted); }
+    .form-group { margin-bottom: 12px; }
+    .form-group label {
+      display: block;
+      font-size: 11px; font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+    }
+    .form-group input {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      padding: 8px 10px;
+      color: var(--text);
+      font-size: 13px;
+      font-family: var(--sans);
+      outline: none;
+      transition: border-color 0.15s;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+    .form-group input:focus { border-color: var(--red); }
+    .btn-primary {
+      width: 100%;
+      background: var(--red);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 9px;
+      font-size: 13px; font-weight: 600;
+      font-family: var(--sans);
+      cursor: pointer;
+      margin-top: 4px;
+      transition: opacity 0.15s;
+    }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .login-error {
+      background: #2a1111;
+      border: 1px solid #5a2020;
+      border-radius: 6px;
+      padding: 8px 10px;
+      color: var(--error);
+      font-size: 12px;
+      margin-top: 10px;
+      display: none;
+    }
+    .login-link { text-align: center; margin-top: 14px; font-size: 11px; color: var(--muted); }
+    .login-link a { color: var(--wg); text-decoration: none; cursor: pointer; }
+    .login-link a:hover { text-decoration: underline; }
+
+    /* ── Empty state ── */
+    .empty-state { padding: 40px 20px; text-align: center; }
+    .empty-icon { font-size: 32px; margin-bottom: 10px; opacity: 0.3; }
+    .empty-state p { color: var(--muted); font-size: 12px; line-height: 1.6; }
+
+    /* ── Timer card ── */
+    .timer-card {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.1s;
+      position: relative;
+    }
+    .timer-card:hover { background: var(--bg2); }
+    .timer-card:last-child { border-bottom: none; }
+    .timer-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+    .timer-badge {
+      font-size: 9px; font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 3px;
+    }
+    .timer-title { font-size: 12px; font-weight: 600; color: var(--text); line-height: 1.3; margin-bottom: 2px; padding-right: 30px; }
+    .timer-ref { font-size: 10px; color: var(--muted); margin-bottom: 8px; }
+    .timer-time { font-family: var(--mono); font-size: 28px; font-weight: 700; letter-spacing: 2px; text-align: center; margin: 8px 0; }
+    .pulse-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--error);
+      display: inline-block;
+      animation: pulse 1.2s ease-in-out infinite;
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.85)} }
+
+    /* ── Descrição ── */
+    .desc-area { margin: 8px 0; }
+    .desc-label { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 4px; }
+    .desc-input {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: 5px;
+      padding: 6px 8px;
+      color: var(--text);
+      font-size: 12px;
+      font-family: var(--sans);
+      resize: none;
+      outline: none;
+      min-height: 52px;
+      line-height: 1.5;
+      transition: border-color 0.15s;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+    .desc-input:focus { border-color: var(--wg); }
+    .desc-input.error { border-color: var(--error); }
+    .desc-error { color: var(--error); font-size: 10px; margin-top: 2px; }
+
+    /* ── Botões ── */
+    .timer-actions { display: flex; gap: 5px; margin-top: 8px; }
+    .btn-timer {
+      flex: 1;
+      border: 1px solid var(--border2);
+      border-radius: 5px;
+      padding: 6px 4px;
+      cursor: pointer;
+      font-size: 11px; font-weight: 600;
+      font-family: var(--sans);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.15s;
+    }
+    .btn-timer svg { width: 12px; height: 12px; }
+    .btn-toggle-run { background: var(--bg2); color: var(--muted); }
+    .btn-toggle-run:hover { color: var(--text); border-color: var(--muted); }
+    .btn-toggle-pause { background: var(--bg2); color: #f0a040; border-color: #f0a04033; }
+    .btn-toggle-pause:hover { background: #1a1500; }
+    .btn-free { background: #0d1f0d; color: var(--success); border-color: #1a3a1a; }
+    .btn-free:hover { background: #122012; }
+    .btn-bill { background: #1a0f0f; color: var(--red-light); border-color: #3a1515; }
+    .btn-bill:hover { background: #220f0f; }
+    .btn-discard {
+      background: none; border: 1px solid transparent; border-radius: 4px;
+      color: var(--muted); cursor: pointer;
+      width: 22px; height: 22px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: all 0.15s;
+      position: absolute; top: 12px; right: 12px;
+    }
+    .btn-discard:hover { color: var(--error); border-color: var(--error); }
+    .btn-discard svg { width: 12px; height: 12px; }
+
+    /* ── Footer ── */
+    .footer {
+      padding: 10px 14px;
+      border-top: 1px solid var(--border);
+      background: var(--bg2);
+      flex-shrink: 0;
+    }
+    .btn-new {
+      width: 100%;
+      background: var(--red);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 8px;
+      font-size: 12px; font-weight: 600;
+      font-family: var(--sans);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: opacity 0.15s;
+    }
+    .btn-new:hover { opacity: 0.85; }
+    .btn-new svg { width: 14px; height: 14px; }
+
+    /* ── Painel novo timer ── */
+    #view-new { padding: 14px; }
+    .new-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .new-header h3 { font-size: 13px; font-weight: 600; color: var(--text); }
+    .tab-switch {
+      display: flex; gap: 3px;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: 7px;
+      padding: 3px;
+      margin-bottom: 12px;
+    }
+    .tab-btn {
+      flex: 1; background: transparent; border: none; border-radius: 5px;
+      padding: 6px 0; font-size: 11px; font-weight: 600;
+      font-family: var(--sans); color: var(--muted); cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tab-btn.active-wg { background: var(--wg); color: #fff; }
+    .tab-btn.active-proj { background: var(--proj); color: #fff; }
+    .search-box { position: relative; margin-bottom: 8px; }
+    .search-box svg { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: var(--muted); width: 12px; height: 12px; }
+    .search-box input {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      padding: 7px 9px 7px 28px;
+      color: var(--text); font-size: 12px;
+      font-family: var(--sans); outline: none;
+      user-select: text; -webkit-user-select: text;
+    }
+    .search-box input:focus { border-color: var(--wg); }
+    .item-list { max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 3px; }
+    .item-list::-webkit-scrollbar { width: 4px; }
+    .item-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+    .item-btn {
+      background: var(--bg3); border: 1px solid var(--border); border-radius: 6px;
+      padding: 8px 10px; cursor: pointer; text-align: left;
+      transition: all 0.1s; width: 100%;
+    }
+    .item-btn:hover { border-color: var(--wg); background: var(--bg2); }
+    .item-btn.proj:hover { border-color: var(--proj); }
+    .item-name { font-size: 12px; color: var(--text); line-height: 1.3; display: block; margin-bottom: 2px; }
+    .item-meta { font-size: 10px; color: var(--muted); display: flex; justify-content: space-between; gap: 6px; }
+
+    /* ── Tarefa selector ── */
+    .tarefa-row { margin: 6px 0 8px; }
+    .btn-sel-tarefa {
+      width: 100%; background: var(--bg3); border: 1px dashed var(--border2);
+      border-radius: 5px; padding: 6px 10px; cursor: pointer;
+      color: var(--muted); font-size: 11px; font-family: var(--sans);
+      display: flex; align-items: center; gap: 6px; transition: all 0.15s;
+    }
+    .btn-sel-tarefa:hover { border-color: var(--proj); color: var(--proj); }
+    .tarefa-selected {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(78,175,138,0.08);
+      border: 1px solid rgba(78,175,138,0.25);
+      border-radius: 5px; padding: 5px 8px;
+    }
+    .btn-change-tarefa {
+      background: none; border: none; color: var(--muted); font-size: 10px;
+      cursor: pointer; font-family: var(--sans); text-decoration: underline; flex-shrink: 0;
+    }
+    .btn-change-tarefa:hover { color: var(--text); }
+
+    /* ── Loading / erro inline ── */
+    .loading-inline {
+      display: flex; justify-content: center; align-items: center;
+      padding: 24px; color: var(--muted); gap: 8px; font-size: 12px;
+    }
+    .spinner-sm {
+      width: 14px; height: 14px;
+      border: 2px solid var(--border2);
+      border-top-color: var(--wg);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite; flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .inline-error { color: var(--error); font-size: 12px; text-align: center; padding: 20px; }
+
+    /* ── Toasts ── */
+    #toasts {
+      position: fixed; bottom: 10px; left: 10px; right: 10px;
+      z-index: 999; display: flex; flex-direction: column; gap: 5px; pointer-events: none;
+    }
+    .toast { padding: 8px 12px; border-radius: 7px; font-size: 12px; font-weight: 500; animation: toastIn 0.2s ease; }
+    .toast.success { background: #0d2a16; border: 1px solid #1a4a28; color: var(--success); }
+    .toast.error   { background: #2a0d0d; border: 1px solid #4a1a1a; color: var(--error); }
+    @keyframes toastIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+
+    /* ── Novo Ticket ── */
+    #view-ticket { padding: 14px; }
+    .ticket-section { margin-bottom: 12px; }
+    .ticket-label {
+      display: block;
+      font-size: 11px; font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+    }
+    .ticket-input, .ticket-select, .ticket-textarea {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      padding: 8px 10px;
+      color: var(--text);
+      font-size: 12px;
+      font-family: var(--sans);
+      outline: none;
+      transition: border-color 0.15s;
+      user-select: text; -webkit-user-select: text;
+    }
+    .ticket-input:focus, .ticket-select:focus, .ticket-textarea:focus { border-color: var(--red); }
+    .ticket-input.err, .ticket-select.err, .ticket-textarea.err { border-color: var(--error); }
+    .ticket-textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+    .ticket-select { appearance: none; -webkit-appearance: none; cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237d8590' stroke-width='2'%3E%3Cpolyline points='6,9 12,15 18,9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px;
+    }
+    .ticket-select option { background: var(--bg3); color: var(--text); }
+    .prioridade-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+    .prio-btn {
+      border: 1px solid var(--border2);
+      border-radius: 5px;
+      padding: 5px 4px;
+      font-size: 10px; font-weight: 600;
+      font-family: var(--sans);
+      cursor: pointer;
+      text-align: center;
+      background: var(--bg3);
+      color: var(--muted);
+      transition: all 0.15s;
+    }
+    .prio-btn.active-low    { background: #0d1f0d; color: var(--success); border-color: #1a3a1a; }
+    .prio-btn.active-medium { background: #1a1500; color: #f0a040; border-color: #3a2800; }
+    .prio-btn.active-high   { background: #1a0f00; color: #E8820C; border-color: #3a2000; }
+    .prio-btn.active-urgent { background: #2a0d0d; color: var(--error); border-color: #4a1a1a; }
+    .char-count { font-size: 10px; color: var(--muted); text-align: right; margin-top: 2px; }
+    .field-error { font-size: 10px; color: var(--error); margin-top: 3px; display: none; }
+    .ticket-success {
+      padding: 32px 20px; text-align: center;
+    }
+    .ticket-success-icon { font-size: 40px; margin-bottom: 12px; }
+    .ticket-success h3 { font-size: 14px; color: var(--text); margin-bottom: 6px; }
+    .ticket-success p { font-size: 12px; color: var(--muted); line-height: 1.6; }
+    .ticket-success .ticket-num { font-family: var(--mono); font-size: 18px; color: var(--success); font-weight: 700; margin: 10px 0; }
+
+    /* ── Modal ── */
+    #modal-confirm {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+      z-index: 900; display: none; align-items: center; justify-content: center; padding: 16px;
+    }
+    #modal-confirm.open { display: flex; }
+    .modal-box { background: var(--bg2); border: 1px solid var(--border2); border-radius: 10px; padding: 20px; width: 100%; }
+    .modal-box h3 { font-size: 14px; color: var(--text); margin-bottom: 6px; }
+    .modal-box p  { font-size: 12px; color: var(--muted); margin-bottom: 16px; line-height: 1.5; }
+    .modal-task { background: var(--bg3); border-radius: 6px; padding: 10px; margin-bottom: 16px; }
+    .modal-task .name { font-size: 12px; color: var(--text); font-weight: 600; margin-bottom: 3px; }
+    .modal-task .ref  { font-size: 10px; color: var(--muted); }
+    .modal-task .desc { font-size: 11px; color: #8a9ab5; margin-top: 6px; font-style: italic; }
+    .modal-actions { display: flex; gap: 6px; }
+    .modal-actions button {
+      flex: 1; border-radius: 6px; padding: 8px;
+      font-size: 12px; font-weight: 600;
+      font-family: var(--sans); cursor: pointer; border: none; transition: opacity 0.15s;
+    }
+    .modal-actions button:hover { opacity: 0.85; }
+    .btn-cancel-modal { background: var(--bg3); color: var(--muted); border: 1px solid var(--border2) !important; }
+    .btn-free-modal   { background: #122012; color: var(--success); border: 1px solid #1a4a1a !important; }
+    .btn-bill-modal   { background: var(--red); color: #fff; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-left">
+      <div class="logo">
+        <img src="https://portal.stratechna.com/portal-logo.png" alt="S"
+          onerror="this.parentElement.innerHTML='<span style=&quot;display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-weight:800;font-size:13px;color:#fff&quot;>S</span>'">
+      </div>
+      <div>
+        <div class="header-title">Cronómetros</div>
+        <div class="header-sub" id="header-sub">A carregar...</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-icon" id="btn-open-portal" title="Abrir portal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </button>
+      <button class="btn-icon" id="btn-logout" title="Terminar sessão" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="content" id="main-content">
+
+    <div id="view-login" style="display:none">
+      <div class="login-logo">
+        <div class="login-logo-box" style="padding:4px">
+          <img src="https://portal.stratechna.com/portal-logo.png" alt="S"
+            style="width:100%;height:100%;object-fit:cover;border-radius:6px"
+            onerror="this.parentElement.innerHTML='S'">
+        </div>
+        <p>Inicia sessão no portal Stratechna</p>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="email@exemplo.pt" autocomplete="email" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <button class="btn-primary" id="btn-login">Entrar</button>
+      <div class="login-error" id="login-error"></div>
+      <div class="login-link">
+        <a id="link-portal">Abrir portal completo</a>
+      </div>
+    </div>
+
+    <div id="view-timers" style="display:none">
+      <div id="timers-list"></div>
+      <div id="empty-state" class="empty-state" style="display:none">
+        <div class="empty-icon">⏱</div>
+        <p>Nenhum cronómetro activo.<br>Clica em <strong>+ Novo cronómetro</strong> para começar.</p>
+      </div>
+    </div>
+
+    <div id="view-new" style="display:none">
+      <div class="new-header"><h3>Seleccionar tarefa</h3></div>
+      <div class="tab-switch">
+        <button class="tab-btn active-wg" id="tab-desk">💼 Zoho Desk</button>
+        <button class="tab-btn" id="tab-projects">🗂 Zoho Projects</button>
+      </div>
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="search-input" placeholder="Pesquisar..." />
+      </div>
+      <div id="new-items-list"></div>
+    </div>
+
+    <div id="view-tarefas" style="display:none">
+      <div style="padding:14px 14px 8px;border-bottom:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Projecto</div>
+        <div id="tarefas-title" style="font-size:13px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
+      </div>
+      <div style="padding:10px 14px 4px;font-size:11px;color:var(--muted)">Selecciona a tarefa a associar ao cronómetro:</div>
+      <div id="tarefas-list" style="padding:0 14px 14px"></div>
+    </div>
+
+    <div id="view-manual" style="display:none;overflow-y:auto"></div>
+
+    <!-- View: Novo Ticket -->
+    <div id="view-ticket" style="display:none;overflow-y:auto">
+
+      <!-- Estado de sucesso -->
+      <div id="ticket-success" style="display:none" class="ticket-success">
+        <div class="ticket-success-icon">&#x2705;</div>
+        <h3>Ticket criado com sucesso!</h3>
+        <div class="ticket-num" id="ticket-num-created"></div>
+        <p>O ticket foi submetido ao Zoho Desk e a equipa sera notificada.</p>
+        <button class="btn-primary" id="btn-ticket-outro" style="margin-top:16px">Criar outro ticket</button>
+      </div>
+
+      <!-- Formulario -->
+      <div id="ticket-form" style="padding:14px;display:flex;flex-direction:column;gap:12px">
+        <div>
+          <label class="ticket-label">Departamento *</label>
+          <select class="ticket-select" id="ticket-dept">
+            <option value="">A carregar...</option>
+          </select>
+          <div class="field-error" id="err-dept">Selecciona um departamento.</div>
+        </div>
+
+        <div>
+          <label class="ticket-label">Assunto *</label>
+          <input type="text" class="ticket-input" id="ticket-assunto" placeholder="Descreve brevemente o problema..." maxlength="200" />
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div class="field-error" id="err-assunto" style="display:none;position:static">O assunto e obrigatorio.</div>
+            <div class="char-count" style="margin-left:auto"><span id="assunto-count">0</span>/200</div>
+          </div>
+        </div>
+
+        <div>
+          <label class="ticket-label">Descricao *</label>
+          <textarea class="ticket-textarea" id="ticket-descricao" placeholder="Descreve o problema com o maximo de detalhe possivel..." maxlength="2000"></textarea>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div class="field-error" id="err-desc" style="display:none;position:static">A descricao e obrigatoria.</div>
+            <div class="char-count" style="margin-left:auto"><span id="desc-count">0</span>/2000</div>
+          </div>
+        </div>
+
+        <div>
+          <label class="ticket-label">Prioridade</label>
+          <div class="prioridade-grid">
+            <button class="prio-btn active-low" data-prio="Low">&#x1F7E2; Baixa</button>
+            <button class="prio-btn" data-prio="Medium">&#x1F7E1; Media</button>
+            <button class="prio-btn" data-prio="High">&#x1F7E0; Alta</button>
+            <button class="prio-btn" data-prio="Urgent">&#x1F534; Urgente</button>
+          </div>
+        </div>
+
+        <div>
+          <button class="btn-primary" id="btn-ticket-submit">Submeter Ticket</button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="footer" id="footer-new" style="display:none">
+    <div style="display:flex;gap:4px;flex-wrap:wrap">
+      <button class="btn-new" id="btn-manual-timer" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border2);flex:1;min-width:0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;flex-shrink:0"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        Manual
+      </button>
+      <button class="btn-new" id="btn-novo-ticket" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border2);flex:1;min-width:0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;flex-shrink:0"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+        Ticket
+      </button>
+      <button class="btn-new" id="btn-new-timer" style="flex:2;min-width:0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;flex-shrink:0"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Cronometro
+      </button>
+    </div>
+  </div>
+
+  <div class="footer" id="footer-back" style="display:none">
+    <button class="btn-new" id="btn-back" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border2)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><polyline points="15,18 9,12 15,6"/></svg>
+      Voltar
+    </button>
+  </div>
+
+  <div id="modal-confirm">
+    <div class="modal-box">
+      <h3>Submeter tempo</h3>
+      <p id="modal-desc"></p>
+      <div class="modal-task" id="modal-task"></div>
+      <div class="modal-actions">
+        <button class="btn-cancel-modal" id="modal-cancel">Cancelar</button>
+        <button class="btn-free-modal" id="modal-free">✓ Gratuito</button>
+        <button class="btn-bill-modal" id="modal-bill">✓ Faturado</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toasts"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
