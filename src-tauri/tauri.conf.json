@@ -11,7 +11,7 @@
     "withGlobalTauri": true,
     "windows": [],
     "security": {
-      "csp": "default-src 'self'; connect-src https://portal.stratechna.com https://fonts.googleapis.com https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://portal.stratechna.com data:; script-src 'self' 'unsafe-inline'"
+      "csp": null
     },
     "trayIcon": {
       "id": "main",
@@ -39,7 +39,6 @@
       "webviewInstallMode": {
         "type": "downloadBootstrapper"
       }
-    },
-    "resources": []
+    }
   }
 }
