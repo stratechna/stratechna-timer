@@ -569,6 +569,15 @@
           <div class="field-error" id="err-dept">Selecciona um departamento.</div>
         </div>
 
+        <!-- Campo Tarefa — só visível para MBontime -->
+        <div id="tarefa-section" style="display:none">
+          <label class="ticket-label">Tarefa *</label>
+          <select class="ticket-select" id="ticket-tarefa">
+            <option value="">Selecciona a tarefa...</option>
+          </select>
+          <div class="field-error" id="err-tarefa" style="display:none;position:static">A tarefa e obrigatoria para MBontime.</div>
+        </div>
+
         <div>
           <label class="ticket-label">Assunto *</label>
           <input type="text" class="ticket-input" id="ticket-assunto" placeholder="Descreve brevemente o problema..." maxlength="200" />

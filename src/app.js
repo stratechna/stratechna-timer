@@ -177,6 +177,33 @@ function showManual() {
 }
 
 // ─── Novo Ticket ──────────────────────────────────────────────────────────────
+const MBONTIME_TAREFAS = [
+  "Secretariado - Gestão de Agenda virtual",
+  "Secretariado - Organização e coordenação de Viagens",
+  "Secretariado - Apoio Administrativo",
+  "Secretariado - Comunicação e Correspondência",
+  "Secretariado - Atendimento com Acolhimento",
+  "Secretariado - Organização de Documentos",
+  "Secretariado - Gestão de Despesas",
+  "Secretariado - Criação e gestão de bases de dados",
+  "Secretariado - Assistência às Relações Laborais",
+  "Secretariado - Ligação entre Departamentos",
+  "Secretariado - Recrutamento seleção e contratação",
+  "Secretariado - Apoio ao processamento salarial",
+  "Secretariado - Participação em Reunião",
+  "Secretariado - Redação de documentos formais",
+  "Assessoria - Assessoria Estratégica",
+  "Assessoria - Assessoria Financeira",
+  "Assessoria - Assessoria de Atendimento ao Cliente",
+  "Assessoria - Assessoria em Recursos Humanos",
+  "Assessoria - Assessoria Informática - Apoio elementar",
+  "Assessoria - Assessoria em Processos e Operações",
+  "Assessoria - Assessoria Doméstica - só para Particulares",
+  "Assessoria - Assessoria em Sustentabilidade e Responsabilidade Social",
+  "Assessoria - Criação e gestão de bases de dados",
+  "Outras tarefas",
+]
+
 let ticketState = {
   prioridade: 'Low',
   departamentos: [],
@@ -199,10 +226,16 @@ async function showNovoTicket() {
   document.getElementById('err-dept').style.display = 'none'
   document.getElementById('err-assunto').style.display = 'none'
   document.getElementById('err-desc').style.display = 'none'
+  document.getElementById('err-tarefa') && (document.getElementById('err-tarefa').style.display = 'none')
   ticketState.prioridade = 'Low'
   document.querySelectorAll('.prio-btn').forEach(b => {
     b.className = 'prio-btn' + (b.dataset.prio === 'Low' ? ' active-low' : '')
   })
+  // Esconder campo tarefa por defeito
+  const tarefaSection = document.getElementById('tarefa-section')
+  if (tarefaSection) tarefaSection.style.display = 'none'
+  const tarefaSel = document.getElementById('ticket-tarefa')
+  if (tarefaSel) tarefaSel.value = 
 
   // Carregar departamentos se ainda nao carregados
   await loadDepartamentos()
@@ -234,6 +267,11 @@ function renderDeptSelect(depts) {
 }
 
 function bindTicketEvents() {
+  // Limpar erro tarefa ao seleccionar
+  document.getElementById('ticket-tarefa')?.addEventListener('change', e => {
+    if (e.target.value) document.getElementById('err-tarefa').style.display = 'none'
+  })
+
   // Contador de caracteres
   document.getElementById('ticket-assunto')?.addEventListener('input', e => {
     document.getElementById('assunto-count').textContent = e.target.value.length
@@ -245,6 +283,19 @@ function bindTicketEvents() {
   })
   document.getElementById('ticket-dept')?.addEventListener('change', e => {
     if (e.target.value) document.getElementById('err-dept').style.display = 'none'
+    // Mostrar campo tarefa apenas para MBontime
+    const tarefaSection = document.getElementById('tarefa-section')
+    if (tarefaSection) {
+      const isMB = e.target.value === 'mbontime'
+      tarefaSection.style.display = isMB ? 'block' : 'none'
+      if (isMB) {
+        const sel = document.getElementById('ticket-tarefa')
+        if (sel && sel.options.length <= 1) {
+          sel.innerHTML = '<option value="">Selecciona a tarefa...</option>' +
+            MBONTIME_TAREFAS.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('')
+        }
+      }
+    }
   })
 
   // Prioridade
@@ -264,10 +315,12 @@ function bindTicketEvents() {
     const assunto = document.getElementById('ticket-assunto')?.value?.trim() || ''
     const descricao = document.getElementById('ticket-descricao')?.value?.trim() || ''
 
+    const tarefa = dept === 'mbontime' ? (document.getElementById('ticket-tarefa')?.value || '') : null
     let hasErr = false
     if (!dept) { document.getElementById('err-dept').style.display = 'block'; hasErr = true }
     if (!assunto) { document.getElementById('err-assunto').style.display = 'block'; hasErr = true }
     if (!descricao) { document.getElementById('err-desc').style.display = 'block'; hasErr = true }
+    if (dept === 'mbontime' && !tarefa) { document.getElementById('err-tarefa').style.display = 'block'; hasErr = true }
     if (hasErr) return
 
     const btn = document.getElementById('btn-ticket-submit')
@@ -283,6 +336,7 @@ function bindTicketEvents() {
           descricao,
           departamento_slug: dept,
           prioridade: ticketState.prioridade,
+          ...(tarefa ? { tarefa } : {}),
         })
       })
       const data = await r.json()
