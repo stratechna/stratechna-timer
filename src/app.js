@@ -138,7 +138,7 @@ let state = {
 document.addEventListener(DOMContentLoaded, async () => {
   // Timeout de emergencia — se nao carrega em 3s, mostra login
   const emergencyTimeout = setTimeout(() => {
-    console.warn(Timeout de emergencia — a mostrar login)
+    console.warn("Timeout de emergencia")
     try { showLogin() } catch(e) {}
     try { bindEvents() } catch(e) {}
   }, 3000)
@@ -159,14 +159,14 @@ document.addEventListener(DOMContentLoaded, async () => {
 
   clearTimeout(emergencyTimeout)
 
-  try { bindEvents() } catch(e) { console.error(bindEvents:, e) }
+  try { bindEvents() } catch(e) { console.error("bindEvents:", e) }
   try { startTick() } catch(e) {}
 
   try {
     if (!state.authenticated) showLogin()
     else showTimers()
   } catch(e) {
-    console.error(show falhou:, e)
+    console.error("show falhou:, e)
     try { showLogin() } catch(e2) {}
   }
 })
