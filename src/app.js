@@ -242,7 +242,7 @@ function renderClienteResultados(resultados) {
   }
   list.style.display = 'block'
   list.innerHTML = resultados.map(c =>
-    '<div class="cli-item" data-id="' + esc(c.id) + '" data-nome="' + esc(c.nome) + '" ' +
+    '<div class="cli-item" data-id="' + esc(c.id) + '" data-nome="' + esc(c.nome) + '" data-crmid="' + esc(c.crm_account_id || '') + '" ' +
     'style="padding:10px 12px;cursor:pointer;border-bottom:1px solid #21262d;font-size:12px;color:#e6edf3;">' +
     '<div style="font-weight:600">' + esc(c.nome) + '</div>' +
     (c.account_nome ? '<div style="font-size:10px;color:#7d8590">' + esc(c.account_nome) + '</div>' : '') +
@@ -253,7 +253,7 @@ function renderClienteResultados(resultados) {
     el.addEventListener('mouseenter', () => { el.style.background = '#161b22' })
     el.addEventListener('mouseleave', () => { el.style.background = '' })
     el.addEventListener('click', () => {
-      ticketState.clienteId = el.dataset.id
+      ticketState.clienteId = el.dataset.crmid || el.dataset.id
       ticketState.clienteNome = el.dataset.nome
       document.getElementById('cliente-selected-nome').textContent = el.dataset.nome
       document.getElementById('cliente-selected').style.display = 'flex'
