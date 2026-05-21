@@ -226,6 +226,8 @@ let ticketState = {
   prioridade: 'Low',
   departamentos: [],
   clienteId: null,
+  clienteDeskContactId: '',
+  clienteDeskAccountId: '',
   clienteNome: '',
   clienteResultados: [],
   clienteSearchTimeout: null,
@@ -242,7 +244,7 @@ function renderClienteResultados(resultados) {
   }
   list.style.display = 'block'
   list.innerHTML = resultados.map(c =>
-    '<div class="cli-item" data-id="' + esc(c.id) + '" data-nome="' + esc(c.nome) + '" data-crmid="' + esc(c.crm_account_id || '') + '" ' +
+    '<div class="cli-item" data-id="' + esc(c.id) + '" data-nome="' + esc(c.nome) + '" data-crmid="' + esc(c.crm_account_id || '') + '" data-deskaccountid="' + esc(c.account_id || '') + '" ' +
     'style="padding:10px 12px;cursor:pointer;border-bottom:1px solid #21262d;font-size:12px;color:#e6edf3;">' +
     '<div style="font-weight:600">' + esc(c.nome) + '</div>' +
     (c.account_nome ? '<div style="font-size:10px;color:#7d8590">' + esc(c.account_nome) + '</div>' : '') +
@@ -253,7 +255,9 @@ function renderClienteResultados(resultados) {
     el.addEventListener('mouseenter', () => { el.style.background = '#161b22' })
     el.addEventListener('mouseleave', () => { el.style.background = '' })
     el.addEventListener('click', () => {
-      ticketState.clienteId = el.dataset.crmid || el.dataset.id
+      ticketState.clienteId = el.dataset.crmid || ''
+      ticketState.clienteDeskContactId = el.dataset.id || ''
+      ticketState.clienteDeskAccountId = el.dataset.deskaccountid || ''
       ticketState.clienteNome = el.dataset.nome
       document.getElementById('cliente-selected-nome').textContent = el.dataset.nome
       document.getElementById('cliente-selected').style.display = 'flex'
@@ -284,6 +288,8 @@ async function showNovoTicket() {
   document.getElementById('err-desc').style.display = 'none'
   document.getElementById('err-tarefa') && (document.getElementById('err-tarefa').style.display = 'none')
   ticketState.clienteId = null
+  ticketState.clienteDeskContactId = ''
+  ticketState.clienteDeskAccountId = ''
   ticketState.clienteNome = ''
   ticketState.clienteResultados = []
   const errCliente = document.getElementById('err-cliente')
@@ -444,7 +450,9 @@ function bindTicketEvents() {
           descricao,
           departamento_slug: dept,
           prioridade: ticketState.prioridade,
-          crm_account_id: ticketState.clienteId,
+          desk_contact_id: ticketState.clienteDeskContactId || undefined,
+          desk_account_id: ticketState.clienteDeskAccountId || undefined,
+          crm_account_id: ticketState.clienteId || undefined,
           ...(tarefa ? { tarefa } : {}),
         })
       })
