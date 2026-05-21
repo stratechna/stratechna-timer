@@ -1065,3 +1065,4 @@ function bindEvents() {
   document.getElementById('modal-free').addEventListener('click', () => doSubmit(false))
   document.getElementById('modal-bill').addEventListener('click', () => doSubmit(true))
 }
+// v1.0.28
