@@ -245,7 +245,8 @@ function renderClienteResultados(resultados) {
     '<div class="cli-item" data-id="' + esc(c.id) + '" data-nome="' + esc(c.nome) + '" ' +
     'style="padding:10px 12px;cursor:pointer;border-bottom:1px solid #21262d;font-size:12px;color:#e6edf3;">' +
     '<div style="font-weight:600">' + esc(c.nome) + '</div>' +
-    (c.nif ? '<div style="font-size:10px;color:#7d8590">NIF: ' + esc(c.nif) + '</div>' : '') +
+    (c.account_nome ? '<div style="font-size:10px;color:#7d8590">' + esc(c.account_nome) + '</div>' : '') +
+    (c.email ? '<div style="font-size:10px;color:#7d8590">' + esc(c.email) + '</div>' : '') +
     '</div>'
   ).join('')
   list.querySelectorAll('.cli-item').forEach(el => {
@@ -343,11 +344,11 @@ function bindTicketEvents() {
     ticketState.clienteSearchTimeout = setTimeout(async () => {
       try {
         const token = await getValidToken()
-        const r = await fetch(`${API_BASE}/crm/search?q=${encodeURIComponent(q)}`, {
+        const r = await fetch(`${API_BASE}/desk/contactos/search?q=${encodeURIComponent(q)}`, {
           headers: { Authorization: `Bearer ${token}` }
         })
         const data = await r.json()
-        const results = data.accounts || []
+        const results = data.contactos || []
         // DEBUG: mostrar no placeholder
         const dbgInp = document.getElementById('ticket-cliente-search')
         if (dbgInp) dbgInp.setAttribute('placeholder', 'Encontrados: ' + results.length)
