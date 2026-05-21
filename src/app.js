@@ -135,7 +135,7 @@ let state = {
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
-document.addEventListener(DOMContentLoaded, async () => {
+document.addEventListener('DOMContentLoaded', async () => {
   // Timeout de emergencia — se nao carrega em 3s, mostra login
   const emergencyTimeout = setTimeout(() => {
     console.warn("Timeout de emergencia")
@@ -148,9 +148,9 @@ document.addEventListener(DOMContentLoaded, async () => {
 
   let token = null
   let timers = []
-  try { token = await storeGet(auth_token) } catch(e) {}
+  try { token = await storeGet('auth_token') } catch(e) {}
   try {
-    const t = await storeGet(timers)
+    const t = await storeGet('timers')
     timers = Array.isArray(t) ? t : []
   } catch(e) {}
 
@@ -282,8 +282,7 @@ function renderClienteResultados(resultados) {
       if (errC) errC.style.display = 'none'
     })
   })
-  return // funcao termina aqui - o codigo abaixo e a versao antiga que sera removida
-
+}
 
 async function showNovoTicket() {
   setView('ticket')
