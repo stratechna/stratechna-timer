@@ -347,9 +347,17 @@ function bindTicketEvents() {
           headers: { Authorization: `Bearer ${token}` }
         })
         const data = await r.json()
-        ticketState.clienteResultados = data.accounts || []
-        renderClienteResultados(ticketState.clienteResultados)
-      } catch { renderClienteResultados([]) }
+        const results = data.accounts || []
+        // DEBUG: mostrar no placeholder
+        const dbgInp = document.getElementById('ticket-cliente-search')
+        if (dbgInp) dbgInp.setAttribute('placeholder', 'Encontrados: ' + results.length)
+        ticketState.clienteResultados = results
+        renderClienteResultados(results)
+      } catch(err) {
+        const dbgInp = document.getElementById('ticket-cliente-search')
+        if (dbgInp) dbgInp.setAttribute('placeholder', 'Erro: ' + String(err.message || err))
+        renderClienteResultados([])
+      }
     }, 300)
   })
 
