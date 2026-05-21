@@ -166,7 +166,7 @@ document.addEventListener(DOMContentLoaded, async () => {
     if (!state.authenticated) showLogin()
     else showTimers()
   } catch(e) {
-    console.error("show falhou:, e)
+    console.error("show falhou:", e)
     try { showLogin() } catch(e2) {}
   }
 })
