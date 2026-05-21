@@ -939,6 +939,23 @@ function openModal(id, billable) {
     <div class="ref">${timer.sistema==='desk'?'Ticket':'Projecto'} #${esc(timer.ticketRef)}</div>
     <div class="desc">"${esc(desc.slice(0,80))}${desc.length>80?'…':''}"</div>`
   document.getElementById('modal-confirm').classList.add('open')
+  // Mostrar checkbox fechar ticket só para tickets Desk
+  const fecharRow = document.getElementById('fechar-ticket-row')
+  const chkFechar = document.getElementById('chk-fechar-ticket')
+  if (fecharRow && chkFechar) {
+    const t = state.timers.find(t => t.id === state.pendingSubmit?.id)
+    if (t && t.sistema === 'desk') {
+      fecharRow.style.display = 'flex'
+      chkFechar.checked = t.fecharTicket || false
+      chkFechar.onchange = (e) => {
+        const tm = state.timers.find(x => x.id === state.pendingSubmit?.id)
+        if (tm) { tm.fecharTicket = e.target.checked; persistTimers() }
+      }
+    } else {
+      fecharRow.style.display = 'none'
+      chkFechar.checked = false
+    }
+  }
 }
 
 async function doSubmit(billable) {
@@ -966,6 +983,10 @@ async function doSubmit(billable) {
       if (timer.fecharTarefa && timer.taskId) {
         await fetch(`${API_BASE}/projects/projetos/${timer.ticketRef}/tarefas/${timer.taskId}/fechar`, { method:'PATCH', headers }).catch(()=>{})
       }
+    }
+    // Fechar ticket Desk se checkbox marcada
+    if (timer.sistema === 'desk' && timer.fecharTicket) {
+      await fetch(`${API_BASE}/desk/tickets/${timer.ticketRef}/fechar`, { method:'PATCH', headers }).catch(()=>{})
     }
     state.timers = state.timers.filter(t => t.id !== id)
     await persistTimers()
