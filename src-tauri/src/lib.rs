@@ -1,5 +1,4 @@
 use tauri_plugin_shell::ShellExt;
-use tauri_plugin_positioner::{Position, WindowExt};
 use tauri::{
     image::Image,
     menu::{MenuBuilder, MenuItemBuilder},
@@ -12,7 +11,6 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_shell::init())
-        .plugin(tauri_plugin_positioner::init())
         .setup(|app| {
             // ── Janela principal (oculta por defeito) ──────────────────────
             let win = WebviewWindowBuilder::new(
@@ -66,7 +64,6 @@ pub fn run() {
                         if w.is_visible().unwrap_or(false) {
                             w.hide().unwrap_or_default();
                         } else {
-                            let _ = w.move_window(Position::TrayBottomCenter);
                             w.show().unwrap_or_default();
                             w.set_focus().unwrap_or_default();
                         }
@@ -95,7 +92,6 @@ pub fn run() {
                         if w.is_visible().unwrap_or(false) {
                             w.hide().unwrap_or_default();
                         } else {
-                            let _ = w.move_window(Position::TrayBottomCenter);
                             w.show().unwrap_or_default();
                             w.set_focus().unwrap_or_default();
                         }
