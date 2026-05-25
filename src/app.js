@@ -31,36 +31,48 @@ async function storeDel(key) { if (tauriStore) await tauriStore.delete(key) }
 
 // ─── Token refresh ────────────────────────────────────────────────────────────
 async function getValidToken() {
-  const token        = await storeGet('auth_token')
-  const refreshToken = await storeGet('refresh_token')
-  if (!token) throw new Error('Sessão expirada — inicia sessão novamente')
+  const token = await storeGet("auth_token")
+  const refreshToken = await storeGet("refresh_token")
 
-  try {
-    const payload    = JSON.parse(atob(token.split('.')[1]))
-    const expiresAt  = payload.exp * 1000
-    const cincoMin   = 5 * 60 * 1000
-    if (expiresAt - Date.now() > cincoMin) return token
-
-    if (!refreshToken) throw new Error('Sessão expirada — inicia sessão novamente')
-    const r = await fetch(`${API_BASE}/auth/refresh`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refresh_token: refreshToken })
-    })
-    if (!r.ok) {
-      await storeSet('auth_token', null)
-      await storeSet('refresh_token', null)
-      throw new Error('Sessão expirada — inicia sessão novamente')
+  // Tentar usar o token actual se válido
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]))
+      const expiresAt = payload.exp * 1000
+      const cincoMin = 5 * 60 * 1000
+      if (expiresAt - Date.now() > cincoMin) return token
+    } catch(e) {
+      // Token mal formado — tentar refresh abaixo
     }
-    const json = await r.json()
-    await storeSet('auth_token', json.access_token)
-    await storeSet('refresh_token', json.refresh_token || refreshToken)
-    return json.access_token
-  } catch (e) {
-    if (e.message.includes('Sessão expirada')) throw e
-    throw new Error('Token inválido — inicia sessão novamente')
   }
+
+  // Tentar refresh
+  if (refreshToken) {
+    try {
+      const r = await fetch(`${API_BASE}/auth/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh_token: refreshToken })
+      })
+      if (r.ok) {
+        const json = await r.json()
+        await storeSet("auth_token", json.access_token)
+        await storeSet("refresh_token", json.refresh_token || refreshToken)
+        return json.access_token
+      }
+    } catch(e) {
+      // Refresh falhou — sessão expirada
+    }
+  }
+
+  // Limpar sessão e pedir login
+  await storeSet("auth_token", null)
+  await storeSet("refresh_token", null)
+  state.authenticated = false
+  showLogin()
+  throw new Error("Sessão expirada — inicia sessão novamente")
 }
+
 
 // ─── Notificação nativa ───────────────────────────────────────────────────────
 async function notifyNative(title, body) {
